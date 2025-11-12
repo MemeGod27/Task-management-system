@@ -1,16 +1,18 @@
 console.log("Server is starting...");
+
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 
-
 const app = express();
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_mongodb+srv://memegodobit23_db_user:<db_password>@cluster0.npootnz.mongodb.net/?appName=Cluster0);
+// ✅ Fixed MongoDB connection string
+mongoose.connect("mongodb+srv://memegodobit23_db_user:memegodobit23_db_user@cluster0.npootnz.mongodb.net/?retryWrites=true&w=majority");
 
+// ✅ Schemas
 const UserSchema = new mongoose.Schema({
   username: String,
   email: String,
@@ -34,6 +36,8 @@ const TaskSchema = new mongoose.Schema({
 const User = mongoose.model("User", UserSchema);
 const Task = mongoose.model("Task", TaskSchema);
 
+// ✅ Routes
+
 // Signup
 app.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
@@ -52,7 +56,7 @@ app.post("/login", async (req, res) => {
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.status(400).json({ error: "Invalid password" });
 
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.SECRET_KEY);
+  const token = jwt.sign({ id: user._id, role: user.role }, "b7f3e1c9a8d4f6e2b0c7a9d1e5f2c3a6");
   res.json({ success: true, token, userId: user._id });
 });
 
@@ -125,13 +129,11 @@ app.get("/tasks", async (req, res) => {
   res.json(tasks);
 });
 
-module.exports = app;
-
+// ✅ Error handler
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-
-
-
+// ✅ Export for Vercel serverless
+module.exports = app;
