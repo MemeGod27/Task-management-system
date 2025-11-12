@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+console.log("Server is starting...");
+
 
 const app = express();
 app.use(express.json());
@@ -124,4 +126,5 @@ app.get("/tasks", async (req, res) => {
 });
 
 module.exports = app;
+
 
