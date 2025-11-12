@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel - Reddit Task Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h1 { color: #333; }
+    form { margin-bottom: 20px; }
+    input, textarea { display: block; margin: 10px 0; padding: 8px; width: 300px; }
+    button { padding: 8px 12px; }
+    .task { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    .claimed { background: #e0ffe0; }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+
+  <!-- Task Creation Form -->
+  <form id="taskForm">
+    <input type="text" id="title" placeholder="Task Title" required>
+    <textarea id="body" placeholder="Task Description" required></textarea>
+    <input type="text" id="imageUrl" placeholder="Image URL (optional)">
+    <button type="submit">Create Task</button>
+  </form>
+
+  <h2>All Tasks</h2>
+  <div id="taskList"></div>
+
+  <h2>User Progress</h2>
+  <div id="progressList"></div>
+
+  <script>
+    const token = localStorage.getItem("userToken");
+
+    // Create Task
+    document.getElementById("taskForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await fetch("/task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          title: document.getElementById("title").value,
+          body: document.getElementById("body").value,
+          imageUrl: document.getElementById("imageUrl").value
+        })
+      });
+      const data = await res.json();
+      alert("Task created!");
+      loadTasks();
+    });
+
+    // Load Tasks
+    async function loadTasks() {
+      const res = await fetch("/tasks", { headers: { "Authorization": `Bearer ${token}` } });
+      const tasks = await res.json();
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+      tasks.forEach(t => {
+        const div = document.createElement("div");
+        div.className = "task" + (t.claimed ? " claimed" : "");
+        div.innerHTML = `
+          <h3>${t.title}</h3>
+          <p>${t.body}</p>
+          ${t.imageUrl ? `<img src="${t.imageUrl}" width="200">` : ""}
+          <p>Status: ${t.claimed ? "Claimed by " + (t.assignedTo?.username || "unknown") : "Available"}</p>
+          <p>Completed: ${t.completed ? "✅ Yes" : "❌ No"}</p>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // Load Progress
+    async function loadProgress() {
+      const res = await fetch("/progress", { headers: { "Authorization": `Bearer ${token}` } });
+      const report = await res.json();
+      const list = document.getElementById("progressList");
+      list.innerHTML = "";
+      report.forEach(r => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <strong>${r.username} (${r.reddit || "no reddit"})</strong><br>
+          Claimed: ${r.claimed} | Completed: ${r.completed}
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    loadTasks();
+    loadProgress();
+  </script>
+</body>
+</html>
