@@ -1,9 +1,9 @@
+console.log("Server is starting...");
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-console.log("Server is starting...");
 
 
 const app = express();
@@ -126,5 +126,12 @@ app.get("/tasks", async (req, res) => {
 });
 
 module.exports = app;
+
+app.use((err, req, res, next) => {
+  console.error("Server error:", err);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
+
 
 
