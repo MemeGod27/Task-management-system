@@ -7,7 +7,7 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI);
+mongoose.connect(process.env.MONGO_mongodb+srv://memegodobit23_db_user:<db_password>@cluster0.npootnz.mongodb.net/?appName=Cluster0);
 
 const UserSchema = new mongoose.Schema({
   username: String,
@@ -124,3 +124,4 @@ app.get("/tasks", async (req, res) => {
 });
 
 module.exports = app;
+
